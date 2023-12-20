@@ -336,7 +336,7 @@ Download it here and then upload it to the tool below to begin.
 
         
     easier_way = st.expander(label="I'm not sure what I'm doing, is there an easier way?", expanded = False)
-    with what_is:
+    with easier_way:
         st.markdown("""## This seems complicated, is there an easier way?
                     
 You have a couple of options - you could **[work with Aira!](https://www.aira.net/)** we don't do forecasting as a stand alone service but if you're planning marketing activity we can help you plan it and, as part of that, we'll do much more advanced forecasting than this (which includes things like expected impact from different activity).
