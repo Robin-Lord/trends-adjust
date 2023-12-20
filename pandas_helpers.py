@@ -24,7 +24,8 @@ def check_for_data_blocks(
         row,
         target_column: str,
         date_column: str,
-        list_of_empties: list
+        list_of_empties: list,
+        regressor_column_list: list[str],
     ):
     """
     check_for_data_blocks 
@@ -43,10 +44,20 @@ def check_for_data_blocks(
         target_column (str): the name of the column we're checking
         date_column (str): the name of the column we'll record in the empty rows list
         list_of_empties (list): a list of dates for the empty rows
+        regressor_column_list (list[str]): list of regressor columns to check to make sure they're not N/A
     """
 
-    value = row[target_column]
     date_value = row[date_column]
+
+    for c in regressor_column_list:
+        if pd.isna(row[c]) or row[c]=="":
+            raise ValueError(f"""
+When you're using regressor columns - you have to put a value in every single row
+for the regressors. In the row for {date_value} your regressor column {c} is empty. 
+Other rows and columns might have the same issue so please check your data, refresh this page
+and try again.""")
+
+    value = row[target_column]
     if value == "" or pd.isna(value):
         list_of_empties.append(date_value)
     
@@ -128,7 +139,8 @@ def check_and_convert_data(
         row = x,
         target_column = new_target_col,
         date_column = new_date_col,
-        list_of_empties = list_of_empty_dates
+        list_of_empties = list_of_empty_dates,
+        regressor_column_list=regressor_cols
         ), axis = 1)
     
     if len(list_of_empty_dates) > 0:
