@@ -6,6 +6,23 @@ import process_forecast as pf
 from typing import Tuple
 from prophet import Prophet # type: ignore
 
+
+def check_columns(df):
+    df_cols = df.columns
+
+    if len(df_cols) != len(list(set(df_cols))):
+        # If the deduped list doesn't match the 
+        # non-deduped list some of the column names
+        # are identical and that will cause problems
+        raise ValueError("""
+                         
+Sorry - it looks like you've uploaded data which has duplicate column
+names, please check your csv, make sure each column has a unique name
+then refresh the page and try again. Thanks!                         
+                         
+""")
+
+
 def date_col_conversion(
         df: pd.DataFrame, 
         date_col: str
@@ -13,9 +30,9 @@ def date_col_conversion(
 
     try:
         df["raw_date"] = pd.to_datetime(df[date_col], format="%Y-%m-%d")
-        df.rename(columns={date_col:"DS"})
+        df = df.rename(columns={date_col:"ds"}, inplace = False)
     except Exception as e:
-        raise ValueError("There was a problem with your date column - please make sure you've selected the right one, and that it is in YYYY-MM-DD format")
+        raise ValueError(f"There was a problem with reading your date column ({date_col}) - please make sure you've selected the right one, and that all the dates are in YYYY-MM-DD format")
     
     return df
 
@@ -32,12 +49,21 @@ def check_for_data_blocks(
 
     This function uses the mutable nature of a list so
     we can loop through every row in a dataframe and count
-    the number of blanks but ALSO make sure that there
-    aren't gaps (essentially we should see ONLY filled 
-    rows until the first empty row, and then we should
-    see ONLY empty rows from then until the end). There
-    should be at least a few empty rows at the end of
-    our data.
+    the number of blanks but ALSO do some checks, i.e.
+    
+    - Make sure that there aren't gaps 
+        (essentially we should see ONLY filled 
+        rows until the first empty row, and then we 
+        should see ONLY empty rows from then until the end). 
+    - Check if there are at least a few empty 'target_column' 
+        rows at the end of our data, if so that's our forecast
+        window, if not we assume we have to generate the forecast window
+    - Check if there are any regressor columns with empty spaces
+        if so that'll cause Prophet to fail so we need to give a 
+        clear and direct error message now so people know what to fix
+    - Check if there are any empty cells in the date column
+        if so that'll cause Prophet to fail so again we need a 
+        clear and direct error message
 
     Args:
         row (DataFrame row): the row of the dataframe we're checking
@@ -47,8 +73,24 @@ def check_for_data_blocks(
         regressor_column_list (list[str]): list of regressor columns to check to make sure they're not N/A
     """
 
+
+
+    # Check if the date column is unexpectedly blank
+    if pd.isna(row[date_column]) or row[date_column]=="":
+        raise ValueError(f"""
+
+It looks like you have a row which has data in it but doesn't have a value
+in the date column ({date_column}). Try checking row {row.name} and make sure
+the date column is filled (and check the rest of the date column while you're at it!)                         
+
+Then refresh this page and try uploading your data again.
+                         
+""")
+
     date_value = row[date_column]
 
+
+    # check if any of the regressor columns are unexpectedly blank
     for c in regressor_column_list:
         if pd.isna(row[c]) or row[c]=="":
             raise ValueError(f"""
@@ -82,6 +124,7 @@ def check_ordering(
         df: pd.DataFrame, 
         date_col: str) -> Tuple[pd.DataFrame, bool]:
     
+
     should_continue = True # Default assumption is no issues
     
     # Check the dataframe is ordered correctly
@@ -109,7 +152,7 @@ def check_and_convert_data(
         ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
 
-    # First convert date column and create expected DS column
+    # First convert date column and create expected ds column
     df = date_col_conversion(df = df, date_col = date_col)
 
 

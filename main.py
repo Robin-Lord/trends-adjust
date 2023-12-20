@@ -7,6 +7,10 @@ import seaborn as sns #type: ignore
 import charting_helpers as ch
 import datetime as datetime
 
+# Error handling
+
+import logging
+
 def add_custom_css():
         # Wr
     custom_css = """
@@ -50,7 +54,16 @@ def handle_uploaded_file():
         # Reset upload section
     if st.session_state.step == "upload":
         st.session_state.step = "columns"
-        st.session_state.file_data = pd.read_csv(st.session_state.uploaded_file)
+
+        # Read file
+        data = pd.read_csv(st.session_state.uploaded_file)
+
+        # Check it has the right columns
+        pdh.check_columns(data)
+
+        st.session_state.file_data = data
+
+
         st.experimental_rerun()
 
     # Read and display the data
@@ -158,6 +171,183 @@ def main():
     add_custom_css()
 
     st.title("Forecast with adjustable trend")
+
+    st.image("assets/aira_logo.png", caption='Aira Digital Marketing', width=150)
+
+
+
+    st.markdown("""# Aira's flexible Machine Learning forecasting tool
+                                    
+Welcome to Aira's flexible forecasting tool!
+                
+Use this tool to create flexible forecasts based on past data. 
+                
+This tool will let you make adjustments to the expected trend based on your own knowledge, while preserving things like seasonal patterns found in your data.
+                """) 
+        
+    what_is = st.expander(label="What is this tool and what is it for?", expanded = False)
+    with what_is:
+        st.markdown("""## What is this tool and what is it for?
+                    
+This is a forecasting tool based on [Facebook's Prophet](https://facebook.github.io/prophet/).
+                    
+It uses Machine Learning to look at your historic data and forecast what future data might look like.
+                    
+Tools like Prophet are a very powerful way to create a forecast which handles things like weekly, monthly, yearly, seasonality as well as trends over time.
+                    
+(Like if your business is growing year-on-year you want to be able to factor in that trend *as well as* the fact that, say, every January is a very low month and you should expect it to be low nomatter how much you grow).
+                    
+**The downside of these tools is that they can end up relying *too much* on past trends.** 
+
+Often we know something that is likely to change from this year to the next, i.e. 
+- We know that growth will slow down because of industry size
+- We know there's a recession looming
+- We have been able to change things whic should stop year-on-year loss.
+                    
+While tools like Prophet have some ways of communicating that (most often 'regressors' which you can still use with this tool), it can sometimes be very hard to communicate to the code that you want it to keep all of the smart seasonality stuff which it is so hard for humans to put together, but you need it to *just ease off a bit* in its enthusiastic upwards or downwards trend.
+                    
+[David Westby has written about this problem](https://aira.net/blog/an-easier-way-to-make-machine-learning-forecasts-smarter/) on the Aira blog, particularly how it relates to marketing forecasting, so if you want to read more, check that out.
+
+This tool was created by the Aira Innovations team (based on logic that Dave came up with) to help ease off on forecasts which are too strong in one direction or another.
+                    
+If first works out what the forecast would be if we assume baseline performance stays exactly the same as it is on the very first day of the forecast (so doesn't go up and down) while keeping all of the seasonal effects. Then it compares that forecast to the standard one and gives you a slider so you can adjust how strongly you want the trend to apply.
+
+It *might* feel like you're adding your biases into a perfect Machine Learning system but, shock horror, tools like Prophet are basically just a scalable way to make assumptions, they assume things like "the trends I've seen up until now will continue", and there is no great way to get them to understand a change they have never seen before. So yea - you're adding in your assumptions and biases, but yours are just as legitimate as long as you've thought about them properly!
+                    
+Thanks for reading! Lots of love
+                    
+**Aira Innovation Team**
+                    
+                    """)
+        
+        # Create two columns for the bios
+        r, d = st.columns(2)
+
+        with d:
+            st.image("assets/David-Westby.jpg")
+            st.markdown("""
+**[David Westby](https://www.linkedin.com/in/dawestby/)**
+                        
+*Senior Data and Insights Consultant*
+                                            
+Originator of the "percent of trend" logic.
+                        
+                        """)            
+            
+        with r:
+            st.image("assets/Robin.jpg")
+            st.markdown("""
+**[Robin Lord](https://www.linkedin.com/in/robin-lord-9906b85a/)**
+                        
+*Assoc. Director of Innovations*
+                                            
+Developed this tool.
+                        
+                        """)
+            
+    
+
+    what_do_i_need = st.expander(label="What do I need to do?", expanded = False)
+    with what_do_i_need:
+        st.markdown("""## What do I need to do?
+
+Upload a CSV file which has at least two columns:
+                    
+|     Date                   | Historic data for whatever number you want to forecast|
+|----------------------------|-------------------------------------------------------|
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |
+
+                    
+- You can call your date column and target number column whatever you want, you will have a chance to select them once you've uploaded your data
+- You have to have a valid yyyy-mm-dd date in every single row
+- Unless you are leaving a gap at the end for the forecast (see below), you have to have a number in every single row of your "number to forecast" column
+                    
+If you fill every row of your uploaded data, we'll automatically create a forecast for the next 3 years (and then you can use as much or as little of it as you want)
+
+### Leaving some rows blank
+
+You can choose to leave a bunch of blank rows at the end, something like this
+                    
+|     Date                   | Historic data for whatever number you want to forecast|
+|----------------------------|-------------------------------------------------------|
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |
+| {date in yyyy-mm-dd format}|                                                       |
+| {date in yyyy-mm-dd format}|                                                       |
+| {date in yyyy-mm-dd format}|                                                       |
+| {date in yyyy-mm-dd format}|                                                       |
+| {date in yyyy-mm-dd format}|                                                       |
+                    
+
+If you do, we'll create a forecast for just the rows you've left blank. You can do that if you want to get a forecast which is more/less than 3 years.
+
+### Regressors                    
+
+You can also do that if you want to use *regressors*. Regressors are a way to highlight patterns in the data so that Prophet can use them to make the forecast more accurate.
+
+Regressors can be particularly useful here because, if you put the right regressors in, you might not *have* to manually adjust the trend with a tool like this. Regardless - you have the option here to select "100% trend" which means "use the exact numbers that Prophet came out with" so if you choose the right regressors and don't have to manually adjust the trend then all the better.
+
+The reason you need to be able to leave blank rows for regressors is that regressors are a way to highlight past patterns *and then tell Prophet how those patterns will continue into the future*. So you *have* to tell Prophet what you think the regressors will be during your forecast period or they won't be any help at all.
+                    
+A dataframe with regressors might look something like this:
+
+                    
+|     Date                   | Historic data for whatever number you want to forecast|   regressor_1  | regressor_2  |
+|----------------------------|-------------------------------------------------------|----------------|--------------|
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |      1         |      0       |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |      1         |      0       |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |      1         |      0       |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |      0         |      10      |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |      0         |      5       |
+| {date in yyyy-mm-dd format}|    (always a number, can be whole number or decimal   |      0         |      5       |
+| {date in yyyy-mm-dd format}|                                                       |      1         |      0       |
+| {date in yyyy-mm-dd format}|                                                       |      1         |      0       |
+| {date in yyyy-mm-dd format}|                                                       |      1         |      0       |
+| {date in yyyy-mm-dd format}|                                                       |      1         |      0       |
+| {date in yyyy-mm-dd format}|                                                       |      1         |      0       |                    
+                    
+If you want some example data to get started with/play around with - feel free to download and use this example data.
+                    
+The regressor column isn't doing anything at the moment but it should give you an example of what format should work.
+                    
+Download it here and then upload it to the tool below to begin.
+                    
+
+                    
+                    """)
+        
+        example_data = pd.read_csv("tests/test_files/example_data_for_users_2.csv")
+
+        st.write(example_data.head())
+
+        example_csv = sth.convert_df(example_data)   
+
+
+
+        st.download_button(
+        f"Download example data",
+        example_csv,
+        f"Example data for forecast.csv",
+        f"Example data for forecast/csv",
+        key='download-example-csv'
+        )
+
+        
+    easier_way = st.expander(label="I'm not sure what I'm doing, is there an easier way?", expanded = False)
+    with what_is:
+        st.markdown("""## This seems complicated, is there an easier way?
+                    
+You have a couple of options - you could **[work with Aira!](https://www.aira.net/)** we don't do forecasting as a stand alone service but if you're planning marketing activity we can help you plan it and, as part of that, we'll do much more advanced forecasting than this (which includes things like expected impact from different activity).
+
+You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](https://www.forecastforge.com/) which integrates directly into Google Sheets. Forecast Forge also has a lot of helpful resources on how to approach this kind of forecasting.
+
+                    
+                    """)
+
+
+    
 
     user_clicks_submit = False
 
@@ -391,4 +581,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # Log the full traceback to console or a file
+        logging.error("An exception occurred", exc_info=True)
+
+        # Display a user-friendly error message
+        st.error(e)
