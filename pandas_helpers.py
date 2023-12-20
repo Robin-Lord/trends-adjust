@@ -115,7 +115,7 @@ def check_and_convert_data(
 
     # Create expected "y" column
     if target_col!= "y":
-        df.rename(columns={target_col:"y"}, inplace=True)
+        df = df.rename(columns={target_col:"y"})
 
     new_target_col = "y"
     new_date_col = "raw_date"
@@ -206,6 +206,8 @@ def choose_columns(
     
     # Prepare options for Target Metric column, excluding the Date column
     target_metric_options = [col for col in df.columns if col != default_date_col]
+
+    print(f"Target metric options: {target_metric_options}")
 
 
     if st.session_state.target_metric_col != None and st.session_state.target_metric_col!=default_date_col:
