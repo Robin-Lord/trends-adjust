@@ -221,7 +221,7 @@ Thanks for reading! Lots of love
                     """)
         
         # Create two columns for the bios
-        r, d = st.columns(2)
+        d, r = st.columns(2)
 
         with d:
             st.image("assets/David-Westby.jpg")
