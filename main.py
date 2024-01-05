@@ -69,9 +69,13 @@ def handle_uploaded_file():
 
     # Read and display the data
     data = st.session_state.file_data
-    st.write("Example top and bottom rows of your CSV:")
+    st.write("""### Example top and bottom rows of your CSV:
+Use these to make sure everything looks right.             
+
+*First 5rows:*
+             """)
     st.write(data.head())
-    st.write("...")
+    st.write("*Last 5 rows:*")
     st.write(data.tail())
 
     # Logic for choosing columns
@@ -86,6 +90,7 @@ def handle_uploaded_file():
             regressor_options, 
             default_regressor_cols,
             ) = pdh.choose_columns(df = data) 
+        
 
     # Show column choosers
     columns_expander = st.expander(label= "Select columns", expanded=st.session_state.step == "columns")
@@ -112,7 +117,7 @@ def handle_uploaded_file():
 
         available_countries = hh.return_available_countries()
 
-        st.session_state.holiday_country = st.selectbox("**Optional** choose country (to automatically pull in some countries):", 
+        st.session_state.holiday_country = st.selectbox("**Optional** choose country (this will automatically pull in some basic holidays for that country which can help the Machine Learning understand seasonal patterns better):", 
                                         options=available_countries,
                                         disabled=st.session_state.step != "columns"
                                         )
@@ -192,22 +197,31 @@ def main():
                                     
 Welcome to Aira's flexible forecasting tool!
                 
-Use this tool to create flexible forecasts based on past data. 
+Use this tool to create flexible Machine Learning forecasts based on past data. 
                 
-This tool will let you make adjustments to the expected trend based on your own knowledge, while preserving things like seasonal patterns found in your data.
+Then you can make adjustments to the expected trend based on your own knowledge, while preserving things like seasonal patterns found in your data.
                 """) 
         
     what_is = st.expander(label="What is this tool and what is it for?", expanded = False)
     with what_is:
-        st.markdown("""## What is this tool and what is it for?
-                    
-This is a forecasting tool based on [Facebook's Prophet](https://facebook.github.io/prophet/).
+        st.markdown("""## What is this tool and what is it for?""")
+        st.image("assets/facebook-prophet-logo.png")            
+
+        st.markdown(                    
+"""This is a forecasting tool based on [Facebook's Prophet](https://facebook.github.io/prophet/).
                     
 It uses Machine Learning to look at your historic data and forecast what future data might look like.
                     
 Tools like Prophet are a very powerful way to create a forecast which handles things like weekly, monthly, yearly, seasonality as well as trends over time.
-                    
+
 (Like if your business is growing year-on-year you want to be able to factor in that trend *as well as* the fact that, say, every January is a very low month and you should expect it to be low nomatter how much you grow).
+""")
+        
+
+        st.image("assets/cycle-chart.png")
+        st.markdown("Image from the [Facebook Prophet research paper](https://peerj.com/preprints/3190/)")
+        st.markdown("""                    
+                    
                     
 **The downside of these tools is that they can end up relying *too much* on past trends.** 
 
@@ -218,7 +232,10 @@ Often we know something that is likely to change from this year to the next, i.e
                     
 While tools like Prophet have some ways of communicating that (most often 'regressors' which you can still use with this tool), it can sometimes be very hard to communicate to the code that you want it to keep all of the smart seasonality stuff which it is so hard for humans to put together, but you need it to *just ease off a bit* in its enthusiastic upwards or downwards trend.
                     
-[David Westby has written about this problem](https://aira.net/blog/an-easier-way-to-make-machine-learning-forecasts-smarter/) on the Aira blog, particularly how it relates to marketing forecasting, so if you want to read more, check that out.
+[David Westby has written about this problem](https://aira.net/blog/an-easier-way-to-make-machine-learning-forecasts-smarter/) on the Aira blog, particularly how it relates to marketing forecasting, so if you want to read more, check that out.""")
+        st.image("assets/david-forecasting-blog.png")
+
+        st.markdown("""
 
 This tool was created by the Aira Innovations team (based on logic that Dave came up with) to help ease off on forecasts which are too strong in one direction or another.
                     
@@ -320,24 +337,26 @@ A dataframe with regressors might look something like this:
 | {date in yyyy-mm-dd format}|                                                       |      1         |      0       |
 | {date in yyyy-mm-dd format}|                                                       |      1         |      0       |                    
                     
-If you want some example data to get started with/play around with - feel free to download and use this example data.
-                    
-The regressor column isn't doing anything at the moment but it should give you an example of what format should work.
-                    
-Download it here and then upload it to the tool below to begin.
-                    
 
                     
+**If you want to see some example data you can use - check out the "Example Data" tab below.**
+                    
                     """)
-        
+    example_data_tab = st.expander(label="Example data", expanded = False)
+    with example_data_tab:
+
+        st.markdown("""## Example Data""")
+
         example_data = pd.read_csv("tests/test_files/example_data_for_users_2.csv")
 
         st.write(example_data.head())
 
         example_csv = sth.convert_df(example_data)   
 
+        st.markdown("""
 
-
+If you want some example data to get started with/play around with - feel free to download and use this example data.""")
+                    
         st.download_button(
         f"Download example data",
         example_csv,
@@ -346,14 +365,24 @@ Download it here and then upload it to the tool below to begin.
         key='download-example-csv'
         )
 
+        st.markdown("""The regressor column isn't doing anything at the moment but it should give you an example of what format should work.
+                    
+Download it here and then upload it to the tool below to begin.
+
+If you need more information about how exactly you use this tool, check out the "What do I need to do?" section above.
+""")
+
+
         
     easier_way = st.expander(label="I'm not sure what I'm doing, is there an easier way?", expanded = False)
     with easier_way:
         st.markdown("""## This seems complicated, is there an easier way?
                     
-You have a couple of options - you could **[work with Aira!](https://www.aira.net/)** we don't do forecasting as a stand alone service but if you're planning marketing activity we can help you plan it and, as part of that, we'll do much more advanced forecasting than this (which includes things like expected impact from different activity).
+You have a couple of options:
+                    
+1. You could **[work with Aira!](https://www.aira.net/)** we don't do forecasting as a stand alone service but if you're planning marketing activity we can help you plan it and, as part of that, we'll do much more advanced forecasting than this (which includes things like expected impact from different activity).
 
-You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](https://www.forecastforge.com/) which integrates directly into Google Sheets. Forecast Forge also has a lot of helpful resources on how to approach this kind of forecasting.
+2. You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](https://www.forecastforge.com/) which integrates directly into Google Sheets. Forecast Forge also has a lot of helpful resources on how to approach this kind of forecasting.
 
                     
                     """)
@@ -441,15 +470,40 @@ You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](http
 
         with forecast_expander:
 
+            if "default_trend_adjustment" not in st.session_state:
+                st.session_state.default_trend_adjustment = 100
+
+            st.markdown(f"""
+                        
+### Adjust trend
+
+Your Machine Learning forecast is below. **The 'trend' is applied at {st.session_state.default_trend_adjustment}% strength.**                        
+
+Use the slider below to adjust the forecast trend. 
+                        
+None of the seasonality patterns will be changed but the general trend of change over time is dampened based on your knowledge of the business.
+
+Adjust the slider if you think that trend is too strong or too weak, when you're done - download the data!
+                        
+                        
+                        """)
+
             # Adjust prediction
             trend_adjustment = st.slider(
                 label = "trend adjustment",
-                min_value = 0.0,
-                max_value = 1.0,
-                value = 1.0,
-                step = 0.05
-                )
+                min_value = 0,
+                max_value = 100,
+                value = 100,
+                step = 5,
+                format="%d%%"
+                )/100
             
+            
+            trend_percent = int((trend_adjustment/1)*100)
+            
+            if trend_percent!= st.session_state.default_trend_adjustment:
+                st.session_state.default_trend_adjustment = trend_percent
+                st.experimental_rerun()
             
             adjusted_forecast = pf.reverse_engineer_forecast_for_trend(
                 forecast_df = prophet_forecast,
@@ -492,7 +546,10 @@ You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](http
             if "default_last_date_to_show" in st.session_state:
                 default_last_date_to_show = st.session_state.default_last_date_to_show
 
-            st.write("Choose dates to filter the chart below (this won't change your data)")
+            st.write("""
+-------------
+### Preview data                    
+Choose dates to filter the chart below (this won't change your data)""")
 
             # Create two columns for the date pickers
             col1, col2 = st.columns(2)
@@ -578,9 +635,20 @@ You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](http
             
             csv = sth.convert_df(unfiltered_for_download)
 
-            trend_percent = int((trend_adjustment/1)*100)
+            st.markdown(f"""
+-------------
+                        
+### Download data
 
-            st.write(f"Click download to download your forecast, assuming trend is applied at {trend_percent}% strength")
+                        
+Click download to download your forecast, assuming trend is applied at {trend_percent}% strength.
+
+If you want a way to visualise your forecast, you can download the plot above as a png by clicking on the "download plot" button just above the chart.
+
+Or you can use [Dave Westby's blog post here to create your own chart with this data in Google Sheets.](https://aira.net/blog/forecasting-and-importance-of-uncertainty/)
+
+""")
+
 
             st.download_button(
             f"Download forecast",
