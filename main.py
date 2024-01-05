@@ -97,21 +97,30 @@ Use these to make sure everything looks right.
     with columns_expander:
     
         # Selection for Date column
-        st.session_state.date_col = st.selectbox("""                          
-    Select the Date column (by default will select any column called 'Date'):""", 
-        options=data.columns, index=date_col_index)
+        st.session_state.date_col = st.selectbox("""Select the Date column (by default will select any column called 'Date'):""", 
+                                        options=data.columns, 
+                                        index=date_col_index, 
+                                        disabled=st.session_state.step != "columns"
+                                        )
+        
         date_col = st.session_state.date_col
 
         # Selection for Target Metric column
         st.session_state.target_metric_col = st.selectbox("Select the Target Metric column:", 
                                         options=target_metrics_options, 
-                                        index= target_metric_col_index)
+                                        index= target_metric_col_index, 
+                                        disabled=st.session_state.step != "columns"
+                                        )
+        
         target_metric_col = st.session_state.target_metric_col
 
         # Selection for Regressor columns
-        st.session_state.regressor_col_list = st.multiselect("Select Regressor columns:", 
+        st.session_state.regressor_col_list = st.multiselect("**Optional** select Regressor columns:", 
                                         options=regressor_options,
-                                        default=default_regressor_cols)
+                                        default=default_regressor_cols, 
+                                        disabled=st.session_state.step != "columns"
+                                        )
+        
         regressor_cols = st.session_state.regressor_col_list
 
 
