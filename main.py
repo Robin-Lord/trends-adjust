@@ -364,7 +364,7 @@ You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](http
         # Column defaults
         st.session_state.date_col = None
         st.session_state.target_metric_col = None
-        st.session_state.regressor_col_list = []
+        st.session_state.regressor_col_list = None
 
 
     # File uploader
