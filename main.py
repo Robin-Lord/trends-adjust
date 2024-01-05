@@ -139,8 +139,15 @@ Use these to make sure everything looks right.
             st.session_state.date_col != default_date_col
             or 
             st.session_state.target_metric_col != default_target_metric_col
-            or st.session_state.regressor_col_list != default_regressor_cols
+            or 
+            st.session_state.regressor_col_list != default_regressor_cols
             ):
+
+            print(f"""
+st.session_state.date_col != default_date_col: {st.session_state.date_col != default_date_col}
+st.session_state.target_metric_col != default_target_metric_col: {st.session_state.target_metric_col != default_target_metric_col}
+st.session_state.regressor_col_list != default_regressor_cols: {st.session_state.regressor_col_list != default_regressor_cols}
+""")
             st.experimental_rerun()
 
 
