@@ -280,7 +280,7 @@ def choose_columns(
     # Prepare options for regressor columns, excluding the other two options
     regressor_options = [col for col in target_metric_options if col != default_target_col]
 
-    if st.session_state.regressor_col_list != []:
+    if st.session_state.regressor_col_list != None:
         default_regressors = [
             col for 
             col in 
