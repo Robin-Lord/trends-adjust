@@ -20,6 +20,10 @@ def create_and_fit_prophet(
     # Add monthly seasonality
     m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
 
+    # Add in country holidays if selected
+    if st.session_state.holiday_country != "None":
+        m.add_country_holidays(country_name = st.session_state.holiday_country)
+
 
     # If the list is empty it shouldn't loop
     for c in regressor_cols:

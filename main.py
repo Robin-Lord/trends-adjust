@@ -6,6 +6,7 @@ import pandas_helpers as pdh
 import seaborn as sns #type: ignore
 import charting_helpers as ch
 import datetime as datetime
+import handle_holiday_list as hh
 
 # Error handling
 
@@ -108,6 +109,16 @@ def handle_uploaded_file():
                                         default=default_regressor_cols)
         regressor_cols = st.session_state.regressor_col_list
 
+
+        available_countries = hh.return_available_countries()
+
+        st.session_state.holiday_country = st.selectbox("**Optional** choose country (to automatically pull in some countries):", 
+                                        options=available_countries,
+                                        disabled=st.session_state.step != "columns"
+                                        )
+        
+
+        
         # Force state update to flush through change 
         # (streamlit seems to need a second) update
         if (
@@ -124,6 +135,7 @@ def handle_uploaded_file():
         st.write(f"Date column: {date_col}")
         st.write(f"Target Metric column: {target_metric_col}")
         st.write(f"Regressor columns: {', '.join(regressor_cols) if regressor_cols else 'None'}")
+        st.write(f"Target country (for automatically including national holidays in ML context): {st.session_state.holiday_country}")
 
         # Display button to submit data
         user_clicks_submit = st.button("Submit")
@@ -365,6 +377,7 @@ You could try other tools, i.e. Richard Fergie's excellent [Forecast Forge](http
         st.session_state.date_col = None
         st.session_state.target_metric_col = None
         st.session_state.regressor_col_list = None
+        st.holiday_country = "None"
 
 
     # File uploader
