@@ -8,6 +8,11 @@ from prophet import Prophet # type: ignore
 
 
 def check_columns(df):
+    """
+    Function to check if all of the column names are unique
+    """
+
+
     df_cols = df.columns
 
     if len(df_cols) != len(list(set(df_cols))):
