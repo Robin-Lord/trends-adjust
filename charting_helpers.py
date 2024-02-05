@@ -66,7 +66,7 @@ def visualise_forecast(
     
         # Add lower bound trace for the fan (invisible)
     fig.add_trace(go.Scatter(
-        x=df[date_col], 
+        x=df['ds'], 
         y=df['yhat_lower'],
         mode='lines',
         line=dict(width=0),
@@ -75,7 +75,7 @@ def visualise_forecast(
 
     # Add upper bound trace for the fan and fill the area
     fig.add_trace(go.Scatter(
-        x=df[date_col], 
+        x=df['ds'], 
         y=df['yhat_upper'],
         mode='lines',
         fill='tonexty',  # Fill area between yhat_upper and yhat_lower

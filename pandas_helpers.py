@@ -126,14 +126,16 @@ and reupload your data.
 
 
 def check_ordering(
-        df: pd.DataFrame, 
-        date_col: str) -> Tuple[pd.DataFrame, bool]:
+        df: pd.DataFrame) -> Tuple[pd.DataFrame, bool]:
     
 
     should_continue = True # Default assumption is no issues
+
+    print(f"Available cols: {df.columns}")
+
     
     # Check the dataframe is ordered correctly
-    date_ordered = df[date_col].is_monotonic_increasing
+    date_ordered = df['ds'].is_monotonic_increasing
 
     if not date_ordered:
         should_continue = sth.continue_or_reset("""
@@ -145,7 +147,7 @@ If you want to start again - reload the page.
 
 """)    
         if should_continue:
-            df = df.sort_values(date_col).reset_index().drop(columns=["index"])
+            df = df.sort_values('ds').reset_index().drop(columns=["index"])
 
     return df, should_continue
 
@@ -163,8 +165,7 @@ def check_and_convert_data(
 
     # Then check ordering
     df, ordering_should_continue = check_ordering(
-        df=df,
-        date_col=date_col)
+        df=df)
     
 
     # Only do the rest of this if we should continue
