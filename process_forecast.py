@@ -113,6 +113,7 @@ def transform_forecast(
 def reverse_engineer_forecast_for_trend(
         forecast_df: pd.DataFrame,
         multiplier: float,
+        scale_bounds: bool,
         ):
     
     """
@@ -132,7 +133,15 @@ def reverse_engineer_forecast_for_trend(
     # components = ['daily', 'weekly', 'yearly', 'monthly', 'holidays']
     # components = [comp for comp in components if comp in forecast_df.columns]
 
-    for line in ["", "_lower", "_upper"]:
+    list_to_scale = [""]
+    list_to_manually_adjust = ["_lower", "_upper"]
+
+    if scale_bounds:
+        list_to_scale = ["", "_lower", "_upper"]
+        list_to_manually_adjust = []
+
+
+    for line in list_to_scale:
         # Loop through standard, lower, and upper forecasts
 
         first_trend_val = forecast_df[f"trend{line}"].iloc[0]
@@ -155,5 +164,16 @@ def reverse_engineer_forecast_for_trend(
         # if our "constant trend" value is lower than actual we'll
         # automatically subtract, if it's higher we'll automatically add on
         forecast_df[f"yhat{line}_adjusted"] = forecast_df[f"yhat{line}_zero_trend"]+forecast_df[f"{line}_trend_diff_to_use"]
+    
+    for line in list_to_manually_adjust:
+        # Loop through upper and lower lines if appropriate
+
+        # Get difference from actual - adjusted line is
+        # New main line forecast daily figure 
+        # plus the old difference between the main line and this upper or lower line
+        forecast_df[f"yhat{line}_adjusted"] = forecast_df[f"yhat_adjusted"]+forecast_df[f"trend{line}"]-forecast_df[f"trend"]
+
+        # Adjust to make sure that is 0 at minimum
+        forecast_df[f"yhat{line}_adjusted"] = forecast_df[f"yhat{line}_adjusted"].clip(lower = 0)
 
     return forecast_df

@@ -517,6 +517,11 @@ Adjust the slider if you think that trend is too strong or too weak, when you're
             
             
             trend_percent = int((trend_adjustment/1)*100)
+
+            # Checkbox with a label and tooltip
+            scale_bounds = st.checkbox(
+                'Scale bounds with trend', 
+                help='When you adjust the trend the bounds will normally stay the same distance from the prediction line as they normally would be. If if you want the bounds to scale along with the trend tick this box.')
             
             if trend_percent!= st.session_state.default_trend_adjustment:
                 st.session_state.default_trend_adjustment = trend_percent
@@ -525,6 +530,7 @@ Adjust the slider if you think that trend is too strong or too weak, when you're
             adjusted_forecast = pf.reverse_engineer_forecast_for_trend(
                 forecast_df = prophet_forecast,
                 multiplier = trend_adjustment,
+                scale_bounds = scale_bounds
             )
 
             # For now - just change the adjusted values to replace the current
