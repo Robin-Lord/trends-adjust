@@ -48,6 +48,7 @@ def add_custom_css():
 def show_upload_expander_contents():
     if st.session_state.uploaded_file == None:
         st.session_state.uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+        st.session_state.data_checked = False
     else:
         st.write(f"Uploaded file: {st.session_state.uploaded_file}")
 

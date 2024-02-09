@@ -149,6 +149,8 @@ If you want to start again - reload the page.
         if should_continue:
             df = df.sort_values('ds').reset_index().drop(columns=["index"])
 
+    print(f"Should continue: {should_continue}") 
+
     return df, should_continue
 
 def check_and_convert_data(
