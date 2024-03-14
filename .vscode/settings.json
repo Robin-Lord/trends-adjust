@@ -1,6 +1,7 @@
 {
     "conventionalCommits.scopes": [
         "forecast",
-        "tracking"
+        "tracking",
+        "data_cleansing"
     ]
 }

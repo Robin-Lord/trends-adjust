@@ -154,15 +154,15 @@ If you want to start again - reload the page.
 
     return df, should_continue
 
-def columns_to_numbers(df, col, col_name):
+def columns_to_numbers(df, _col, col_name):
     # Convert Y and regressor cols to numbers to avoid errors
     try:
-        df[col] = df[col].astype(float)
+        df[_col] = df[_col].astype(float)
     except Exception as e:
 
         try:
             # Try removing commas
-            df[col] = df[col].str.replace(',', '').astype(float)
+            df[_col] = df[_col].str.replace(',', '').astype(float)
         except Exception as f:
             print(f"Exception 1: {e}")
             print(f"Exception 2: {f}")
