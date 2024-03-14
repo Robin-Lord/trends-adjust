@@ -618,15 +618,15 @@ Choose dates to filter the chart below (this won't change your data)""")
                     st.session_state.default_first_date_to_show = first_date_to_show
             with col2:
 
-                if default_last_date_to_show<first_date_to_show:
+                if default_last_date_to_show<first_date_to_show: 
                     default_last_date_to_show = first_date_to_show
 
                 last_date_to_show = st.date_input(
                     "Latest date to show",
                     value = default_last_date_to_show,
-                    min_value=first_date_to_show,
+                    min_value=first_date_to_show, # type: ignore
                     max_value=latest_date
-                )
+                ) 
                 if "default_last_date_to_show" not in st.session_state:
                     st.session_state.default_last_date_to_show = last_date_to_show
 
@@ -643,11 +643,11 @@ Choose dates to filter the chart below (this won't change your data)""")
                 st.experimental_rerun()
 
 
-            if last_date_to_show<=first_date_to_show:
+            if last_date_to_show<=first_date_to_show: # type: ignore
                 if first_date_to_show == latest_date:
-                    first_date_to_show = first_date_to_show-datetime.timedelta(days = 2)
+                    first_date_to_show = first_date_to_show-datetime.timedelta(days = 2) # type: ignore
                 # Make sure users can't accidentally over-filter table
-                last_date_to_show = first_date_to_show+datetime.timedelta(days=1)
+                last_date_to_show = first_date_to_show+datetime.timedelta(days=1) # type: ignore
 
             filtered_for_chart = for_chart[
                 for_chart["ds"]>=first_date_to_show
