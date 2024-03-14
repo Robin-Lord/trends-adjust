@@ -66,3 +66,4 @@ update==0.0.1
 urllib3==2.1.0
 validators==0.22.0
 zipp==3.17.0
+git+https://github.com/Robin-Lord/ga4-py.git@1.0.0
