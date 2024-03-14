@@ -5,8 +5,9 @@ import numpy as np
 import process_forecast as pf
 from typing import Tuple
 from prophet import Prophet # type: ignore
+import ga4py.add_tracker as add_tracker
 
-
+@add_tracker.analytics_hit_decorator
 def check_columns(df):
     """
     Function to check if all of the column names are unique

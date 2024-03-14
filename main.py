@@ -8,6 +8,12 @@ import charting_helpers as ch
 import datetime as datetime
 import handle_holiday_list as hh
 
+# Tracking decorator
+import ga4py.add_tracker as add_tracker
+from ga4py.custom_arguments import MeasurementArguments
+
+from typing import Union, Tuple
+
 # Error handling
 
 import logging
@@ -52,7 +58,8 @@ def show_upload_expander_contents():
     else:
         st.write(f"Uploaded file: {st.session_state.uploaded_file}")
 
-def handle_uploaded_file():
+def handle_uploaded_file() -> Tuple[pd.DataFrame, str, str, list]:
+    
         # Reset upload section
     if st.session_state.step == "upload":
         st.session_state.step = "columns"
@@ -60,8 +67,13 @@ def handle_uploaded_file():
         # Read file
         data = pd.read_csv(st.session_state.uploaded_file)
 
+        # Add tracking at this point of the process, as a sign a user has started using the tool
+        tracking_args_dict = st.session_state.basic_tracking_info.copy()
+        tracking_args_dict["skip_stage"] = ["start", "end"]
+        tracking_args_dict["stage"] = "upload_file"
+
         # Check it has the right columns
-        pdh.check_columns(data)
+        pdh.check_columns(data, ga4py_args_remove = tracking_args_dict)
 
         st.session_state.file_data = data
 
@@ -198,8 +210,8 @@ def handle_dates_checks(data, date_col, target_metric_col, regressor_cols):
         return current_data, future_data, date_col, target_metric_col, regressor_cols
 
 
-
-def main():
+@add_tracker.analytics_hit_decorator
+def main() -> None:
 
 
     add_custom_css()
@@ -425,6 +437,16 @@ You have a couple of options:
         st.session_state.regressor_col_list = None
         st.session_state.holiday_country = "None"
 
+        # Basic information for tracking hits
+        basic_tracking_info: MeasurementArguments = {
+            # "testing_mode": True,
+            "page_location": "python_trends_adjusting", 
+            "page_title": "python trends adjusting", 
+            "logging_level": "all",
+        }
+
+        st.session_state.basic_tracking_info = basic_tracking_info
+
 
     # File uploader
     upload_expander = st.expander(label = "Upload file", expanded=st.session_state.step == "upload")
@@ -472,10 +494,16 @@ You have a couple of options:
                 regressor_cols = regressor_cols,
             )
 
+            # Add tracking at this point of the process, as a sign a user is getting their forecast
+            tracking_args_dict = st.session_state.basic_tracking_info.copy()
+            tracking_args_dict["skip_stage"] = ["start", "end"]
+            tracking_args_dict["stage"] = "generate_forecast"
+
             # Make prediction
             st.session_state.prophet_forecast = pf.create_forecast(
                         fitted_model = st.session_state.prophet_model,
-                        future_data = future_data
+                        future_data = future_data,
+                        ga4py_args_remove = tracking_args_dict
                         )
         
         prophet_forecast = st.session_state.prophet_forecast
@@ -686,7 +714,14 @@ Or you can use [Dave Westby's blog post here to create your own chart with this 
 
 if __name__ == "__main__":
     try:
-        main()
+        # Add tracking
+        tracking_args_dict: MeasurementArguments = {
+            # "testing_mode": True,
+            "page_location": "python_trends_adjusting", 
+            "page_title": "python trends adjusting", 
+            "skip_stage": ["start", "end"]
+        }
+        main(ga4py_args_remove = tracking_args_dict)
     except Exception as e:
         # Log the full traceback to console or a file
         logging.error("An exception occurred", exc_info=True)

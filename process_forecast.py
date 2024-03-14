@@ -9,6 +9,8 @@ import datetime
 
 from typing import Tuple
 
+import ga4py.add_tracker as add_tracker
+
 
 def create_and_fit_prophet(
         df: pd.DataFrame,
@@ -84,7 +86,7 @@ We will generate a forecast from {last_user_date_str} until {last_forecast_date_
     return last_date_of_user_data, last_date_of_forecast, days_to_add
 
 
-
+@add_tracker.analytics_hit_decorator
 def create_forecast(
         fitted_model: Prophet,
         future_data: pd.DataFrame
