@@ -154,6 +154,24 @@ If you want to start again - reload the page.
 
     return df, should_continue
 
+def columns_to_numbers(df, col, col_name):
+    # Convert Y and regressor cols to numbers to avoid errors
+    try:
+        df[col] = df[col].astype(float)
+    except Exception as e:
+
+        try:
+            # Try removing commas
+            df[col] = df[col].str.replace(',', '').astype(float)
+        except Exception as f:
+            print(f"Exception 1: {e}")
+            print(f"Exception 2: {f}")
+            raise ValueError(f"""
+Error converting the data in your target column '{col_name}' to numbers. 
+
+Please check your '{col_name}' column and make sure there's only numbers (or blank cells) in that column.""")
+
+
 def check_and_convert_data(
         df: pd.DataFrame, 
         date_col: str, 
@@ -194,6 +212,13 @@ def check_and_convert_data(
         list_of_empties = list_of_empty_dates,
         regressor_column_list=regressor_cols
         ), axis = 1)
+    
+
+    # Convert the columns to numbers to make sure we don't hit confusing errors later
+    columns_to_numbers(df, "y", target_col)
+    for _col in regressor_cols:
+        columns_to_numbers(df, _col, _col)
+
     
     if len(list_of_empty_dates) > 0:
         current: pd.DataFrame = df[~df[new_date_col].isin(list_of_empty_dates)]
