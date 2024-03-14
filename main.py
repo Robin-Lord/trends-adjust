@@ -423,7 +423,7 @@ You have a couple of options:
         st.session_state.date_col = None
         st.session_state.target_metric_col = None
         st.session_state.regressor_col_list = None
-        st.holiday_country = "None"
+        st.session_state.holiday_country = "None"
 
 
     # File uploader
