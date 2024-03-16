@@ -37,7 +37,8 @@ def create_and_fit_prophet(
     
     # Log transform data to avoid predictions that go below 0
     df_for_fit = df.copy(deep=True)
-    df_for_fit["y"] = np.log(df_for_fit["y"])
+    if st.session_state.use_log_scale:
+        df_for_fit["y"] = np.log(df_for_fit["y"])
 
     m.fit(df_for_fit)
 
@@ -105,9 +106,10 @@ def transform_forecast(
     
     # Log transform predicted data (reversing earlier transform)
     # Clip values at 0 to avoid any negatives
-    for c in columns_to_adjust:
-        df[c] = np.exp(df[c])
-        df[c] = df[c].clip(lower = 0)
+    if st.session_state.use_log_scale:
+        for c in columns_to_adjust:
+            df[c] = np.exp(df[c])
+            df[c] = df[c].clip(lower = 0)
         
     return df
 

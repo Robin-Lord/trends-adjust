@@ -145,6 +145,14 @@ Use these to make sure everything looks right.
                                         )
         
 
+        # Checkbox with a label and tooltip
+        st.session_state.use_log_scale = st.checkbox(
+            'Use log scale', 
+            help='Sometimes Machine Learning forecasts can give unhelpful answers (i.e. predicting negative traffic based on a past trend). Using a log scale can help you avoid that problem',
+            value=False,
+            disabled=st.session_state.step != "columns")
+        
+
         
         # Force state update to flush through change 
         # (streamlit seems to need a second) update
