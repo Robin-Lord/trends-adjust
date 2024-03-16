@@ -557,7 +557,8 @@ Adjust the slider if you think that trend is too strong or too weak, when you're
             # Checkbox with a label and tooltip
             scale_bounds = st.checkbox(
                 'Scale bounds with trend', 
-                help='When you adjust the trend the bounds will normally stay the same distance from the prediction line as they normally would be. If if you want the bounds to scale along with the trend tick this box.')
+                help='When you adjust the trend the bounds will normally stay the same distance from the prediction line as they normally would be. If if you want the bounds to scale along with the trend tick this box.',
+                value = True)
             
             if trend_percent!= st.session_state.default_trend_adjustment:
                 st.session_state.default_trend_adjustment = trend_percent

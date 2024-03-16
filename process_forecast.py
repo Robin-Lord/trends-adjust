@@ -172,10 +172,10 @@ def reverse_engineer_forecast_for_trend(
     for line in list_to_manually_adjust:
         # Loop through upper and lower lines if appropriate
 
-        # Get difference from actual - adjusted line is
-        # New main line forecast daily figure 
-        # plus the old difference between the main line and this upper or lower line
-        forecast_df[f"yhat{line}_adjusted"] = forecast_df[f"yhat_adjusted"]+forecast_df[f"trend{line}"]-forecast_df[f"trend"]
+        # Recalculate difference based on difference between original and new yhat
+        yhat_diff = forecast_df[f"yhat_adjusted"]-forecast_df["yhat"]
+
+        forecast_df[f"yhat{line}_adjusted"] = forecast_df[f"yhat{line}"]-yhat_diff
 
         # Adjust to make sure that is 0 at minimum
         forecast_df[f"yhat{line}_adjusted"] = forecast_df[f"yhat{line}_adjusted"].clip(lower = 0)
