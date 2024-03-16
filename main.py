@@ -719,6 +719,21 @@ Or you can use [Dave Westby's blog post here to create your own chart with this 
             )
             
 
+            st.markdown(f"""
+-------------
+                        
+### Something wrong with your forecast?
+
+If your forecast looks weird and you're not sure what to do, there are some things you can try.
+                        
+- If your forecast is including negative numbers where there shouldn't be negative numbers (i.e. you're forecasting traffic, which is 0 at minimum) try reloading the page and switching on "use log scale" in the column selection section.
+                        
+- Try including regressors in your forecast data (extra columns which highlight patterns in the historic data). Be aware - to use regressors you'll need to extend your date column into the future and include values in the regressor columns for the blank future rows.
+
+- Try including more historic data to help the model understand past seasonal patterns
+
+
+""")
 
 
 if __name__ == "__main__":
