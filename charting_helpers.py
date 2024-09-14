@@ -10,35 +10,26 @@ def line_plot_highlighting_missing_sections(
         date_col: str,
         target_col: str) -> go.Figure:
 
-    # Streamlit reruns can cause errors here - just standardise the df for visualisation
-    # It would be better to do this in a more standard way at a higher level but this is
-    # just a hotfix for now
-    df_to_use = df.copy()
-    future_df_to_use = future_df.copy()
-    renaming_dict = {}
-
-    if target_col not in df_to_use.columns:
-        renaming_dict["y"] = target_col
-    if date_col not in df_to_use.columns:
-        renaming_dict["ds"] = date_col
-    if renaming_dict != {}:
-        df_to_use.rename(renaming_dict, inplace=True)
-        future_df_to_use.rename(renaming_dict, inplace=True)
+    # Hotfix of columns - :poop: code but just have to get it working
+    if date_col not in df.columns:
+        date_col = "ds"
+    if target_col not in df.columns:
+        target_col = "y"
 
     # Create a line chart
     fig = go.Figure()
 
     # Add line trace
     fig.add_trace(go.Scatter(
-        x=df_to_use[date_col],
-        y=df_to_use[target_col],
+        x=df[date_col],
+        y=df[target_col],
         mode='lines',
         name=target_col)
     )
 
     # Find first missing row
-    first_missing = future_df_to_use[date_col].iloc[0]
-    last_missing = future_df_to_use[date_col].iloc[len(future_df_to_use)-1]
+    first_missing = future_df["ds"].iloc[0]
+    last_missing = future_df["ds"].iloc[len(future_df)-1]
 
     st.write(f"We will forecast data from {first_missing} to {last_missing}")
 
@@ -67,34 +58,27 @@ def visualise_forecast(
         target_col: str,
         date_col: str):
 
-    # Streamlit reruns can cause errors here - just standardise the df for visualisation
-    # It would be better to do this in a more standard way at a higher level but this is
-    # just a hotfix for now
-    df_to_use = df.copy()
-    renaming_dict = {}
-
-    if target_col not in df_to_use.columns:
-        renaming_dict["y"] = target_col
-    if date_col not in df_to_use.columns:
-        renaming_dict["ds"] = date_col
-    if renaming_dict != {}:
-        df_to_use.rename(renaming_dict, inplace=True)
+    # Hotfix of columns - :poop: code but just have to get it working
+    if date_col not in df.columns:
+        date_col = "ds"
+    if target_col not in df.columns:
+        target_col = "y"
 
     # Create a line chart
     fig = go.Figure()
 
     # Add line trace
     fig.add_trace(go.Scatter(
-        x=df_to_use[date_col],
-        y=df_to_use[target_col],
+        x=df[date_col],
+        y=df[target_col],
         mode='lines',
         name='historic')
     )
 
     # Add lower bound trace for the fan (invisible)
     fig.add_trace(go.Scatter(
-        x=df_to_use[date_col],
-        y=df_to_use['yhat_lower'],
+        x=df[date_col],
+        y=df['yhat_lower'],
         mode='lines',
         line=dict(width=0),
         showlegend=False)
@@ -102,8 +86,8 @@ def visualise_forecast(
 
     # Add upper bound trace for the fan and fill the area
     fig.add_trace(go.Scatter(
-        x=df_to_use[date_col],
-        y=df_to_use['yhat_upper'],
+        x=df[date_col],
+        y=df['yhat_upper'],
         mode='lines',
         fill='tonexty',  # Fill area between yhat_upper and yhat_lower
         line=dict(width=0),
@@ -112,8 +96,8 @@ def visualise_forecast(
     )
 
     fig.add_trace(go.Scatter(
-        x=df_to_use[date_col],
-        y=df_to_use['yhat'],
+        x=df[date_col],
+        y=df['yhat'],
         mode='lines',
         name='forecast')
     )
